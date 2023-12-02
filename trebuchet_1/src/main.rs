@@ -1,6 +1,12 @@
 /**
+ * Results:
  * Part 1 - 54953
  * Part 2 - 53868
+ *
+ * TODO
+ * - replace String to str (char)
+ * - replace for loop to for_each
+ * - performance optimizations
  */
 use std::{fs, vec};
 
@@ -29,6 +35,17 @@ fn sort_by_position(vector: Vec<(String, u16)>) -> Vec<String> {
     }
 
     result
+}
+
+fn to_usize(num: String) -> u16 {
+    match num.parse::<u16>() {
+        Ok(n) => {
+            return n;
+        }
+        Err(_) => {
+            return 0;
+        }
+    }
 }
 
 fn extract_common_digits(calibration: &String) -> Vec<(String, u16)> {
@@ -72,17 +89,7 @@ fn extract_digits(calibration: &String) -> Vec<u16> {
 
     let digits = sort_by_position(extracted);
 
-    digits
-        .iter()
-        .map(|digit| match digit.parse::<u16>() {
-            Ok(n) => {
-                return n;
-            }
-            Err(_) => {
-                return 0;
-            }
-        })
-        .collect()
+    digits.iter().map(|d| to_usize(d.clone())).collect()
 }
 
 fn extract_all_digits(calibrations: Vec<String>) -> Vec<Vec<u16>> {
@@ -106,10 +113,7 @@ fn concat_digits(digits: &Vec<u16>) -> String {
 }
 
 fn unify_digits(digits: &Vec<u16>) -> u16 {
-    match concat_digits(digits).parse::<u16>() {
-        Ok(n) => return n,
-        Err(_) => return 0,
-    }
+    to_usize(concat_digits(digits))
 }
 
 fn main() {
