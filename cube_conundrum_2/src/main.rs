@@ -1,6 +1,10 @@
 /**
  * Results:
  * - Part 1: 2771
+ * - Part 2: 70924
+ *
+ * TODO
+ * - work better with u16 and u32 (avoid casting)
  */
 use std::fs;
 
@@ -64,46 +68,96 @@ fn get_game_attempts(line: &String) -> Vec<GameAttempt> {
         .collect::<Vec<_>>()
 }
 
-fn game_can_ran_with_ideal_bag(
-    game_attempts: &Vec<GameAttempt>,
-    ideal_game_bag: &GameAttempt,
-) -> bool {
-    for attempt in game_attempts {
-        if attempt.red > ideal_game_bag.red
-            || attempt.green > ideal_game_bag.green
-            || attempt.blue > ideal_game_bag.blue
-        {
-            return false;
+// Relative to part.1 of day 2
+// fn game_can_ran_with_ideal_bag(
+//     game_attempts: &Vec<GameAttempt>,
+//     ideal_game_bag: &GameAttempt,
+// ) -> bool {
+//     for attempt in game_attempts {
+//         if attempt.red > ideal_game_bag.red
+//             || attempt.green > ideal_game_bag.green
+//             || attempt.blue > ideal_game_bag.blue
+//         {
+//             return false;
+//         }
+//     }
+
+//     true
+// }
+
+fn find_higher_count(counts: Vec<u16>) -> u16 {
+    let mut result = counts[0];
+
+    for count in counts {
+        if result < count {
+            result = count;
         }
     }
 
-    true
+    result
 }
+
+fn find_best_attempt(attempts: &Vec<GameAttempt>) -> GameAttempt {
+    let red = find_higher_count(attempts.iter().map(|i| i.red).collect());
+    let green = find_higher_count(attempts.iter().map(|i| i.green).collect());
+    let blue = find_higher_count(attempts.iter().map(|i| i.blue).collect());
+
+    // println!("red {red}, green {green}, blue {blue}");
+
+    GameAttempt { red, green, blue }
+}
+
+// Relative to part.1 of day 2
+// fn _find_ideal_games() {
+//     let games_lines = get_games();
+//     let ideal_game_bag = GameAttempt {
+//         red: 12,
+//         green: 13,
+//         blue: 14,
+//     };
+
+//     let games: Vec<_> = games_lines
+//         .iter()
+//         .map(|game| (get_game_id(game), get_game_attempts(game)))
+//         .collect();
+
+//     let mut possible_games_ids: Vec<u16> = vec![];
+
+//     for game in games {
+//         let (game_id, attempts) = game;
+
+//         if game_can_ran_with_ideal_bag(&attempts, &ideal_game_bag) {
+//             possible_games_ids.push(game_id);
+//         }
+//     }
+
+//     let sum: u16 = possible_games_ids.iter().sum();
+
+//     println!("sum of all possible games: {sum}");
+// }
 
 fn main() {
     let games_lines = get_games();
-    let ideal_game_bag = GameAttempt {
-        red: 12,
-        green: 13,
-        blue: 14,
-    };
 
     let games: Vec<_> = games_lines
         .iter()
         .map(|game| (get_game_id(game), get_game_attempts(game)))
         .collect();
 
-    let mut possible_games_ids: Vec<u16> = vec![];
+    let games_with_best_attempt: Vec<_> = games
+        .iter()
+        .map(|game| find_best_attempt(&game.1))
+        .collect();
 
-    for game in games {
-        let (game_id, attempts) = game;
+    let power_of_cubes_games: Vec<_> = games_with_best_attempt
+        .iter()
+        .map(|game| game.red * game.green * game.blue)
+        .collect();
 
-        if game_can_ran_with_ideal_bag(&attempts, &ideal_game_bag) {
-            possible_games_ids.push(game_id);
-        }
-    }
+    let sum: u32 = power_of_cubes_games
+        .iter()
+        .map(|i| u32::from(i.clone()))
+        .sum();
 
-    let sum: u16 = possible_games_ids.iter().sum();
-
-    println!("sum of all possible games: {sum}");
+    println!("sum of power of all games with best attempt is: {sum}");
 }
